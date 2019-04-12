@@ -1,36 +1,24 @@
-
-from flask import Flask, request, jsonify
+from aiohttp import web
 from redis.sentinel import Sentinel
 from redisgraph import Node, Edge, Graph
-import bson
+
+async def root(request):
+    text = "Hello from aiohttp"
+    return web.Response(text=text)
+
+async def redis(request):
+    query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
+    result = redis_graph.query(query)
+    return web.Response(text=str(len(result.result_set[1][0])))
+
+
 
 sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=5)
 slave = sentinel.slave_for('mymaster', socket_timeout=0.3)
 redis_graph = Graph('bulk', slave)
-app = Flask(__name__)
 
-@app.route('/')
-def root():
-    return 'RedisGraphQL Flask Testing Service\n'
+app = web.Application()
+app.add_routes([web.get('/', root),
+                web.get('/{name}', redis)])
 
-@app.route('/login',  methods=['GET', 'POST'])
-def login():
-    deviceid = request.values.get('deviceid')
-    return '/login - device: {}\n'.format(deviceid)
-
-@app.route('/metrics',  methods=['GET', 'POST'])
-def metrics():
-    deviceid = request.values.get('deviceid')
-    timestamp = request.values.get('timestamp')
-    
-    return '/metrics - device: {}, timestamp: {}\n'.format(deviceid, timestamp)
-
-@app.route('/redis',  methods=['GET', 'POST'])
-def redis():
-    query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
-    result = redis_graph.query(query)
-    return jsonify(len(result.result_set[1][0]))
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+web.run_app(app)

@@ -28,7 +28,7 @@ def redis():
     result = redis_graph.query(query)
 
     status = b'200 OK'
-    res = result.result_set
+    res = str(result.result_set[1][0],'utf-8')
     response_headers = [('Content-type', 'text/plain'), ('Content-Length', str(len(res)))]
     start_response(status, response_headers)
     return [res]
