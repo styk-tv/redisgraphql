@@ -1,24 +1,37 @@
-from aiohttp import web
+
+from flask import Flask, render_template, request
+import meinheld
 from redis.sentinel import Sentinel
 from redisgraph import Node, Edge, Graph
 
-async def root(request):
-    text = "Hello from aiohttp"
-    return web.Response(text=text)
-
-async def redis(request):
-    query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
-    result = redis_graph.query(query)
-    return web.Response(text=str(len(result.result_set[1][0])))
-
-
-
 sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=5)
-slave = sentinel.slave_for('mymaster', socket_timeout=0.3)
+slave = sentinel.slave_for('mymaster', socket_timeout=5)
 redis_graph = Graph('bulk', slave)
 
-app = web.Application()
-app.add_routes([web.get('/', root),
-                web.get('/{name}', redis)])
+SECRET_KEY = 'development key'
+DEBUG = False
 
-web.run_app(app)
+app = Flask(__name__)
+app.config.from_object(__name__)
+
+
+@app.route('/')
+def root(status, response_headers):
+    return 'RedisGraphQL Mainheld Testing Service\n'
+
+
+
+@app.route('/redis',  methods=['GET'])
+def redis(status, response_headers):
+    query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
+    result = redis_graph.query(query)
+
+    status = b'200 OK'
+    res = str(result.result_set[1][0],'utf-8')
+    #response_headers = [('Content-type', 'text/plain'), ('Content-Length', str(len(res)))]
+    #start_response(status, response_headers)
+    return [bytes(res, 'utf-8')]
+
+
+#meinheld.listen(("0.0.0.0", 8080))
+#meinheld.run(app)
