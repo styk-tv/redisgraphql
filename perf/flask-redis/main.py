@@ -5,7 +5,8 @@ from flask import Flask, request
 from redis.sentinel import Sentinel
 from redisgraph import Node, Edge, Graph
 
-sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=0.1)
+#sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=0.1)
+sentinel = Sentinel([('localhost', 26379)])
 slave = sentinel.slave_for('mymaster', socket_timeout=0.3)
 redis_graph = Graph('bulk', slave)
 app = Flask(__name__)
@@ -30,7 +31,7 @@ def metrics():
 def redis():
     query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
     result = redis_graph.query(query)
-    return json.dumps(result.result_set[0])
+    return json.dumps(result.result_set[1])
 
 
 if __name__ == '__main__':
