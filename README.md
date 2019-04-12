@@ -9,7 +9,7 @@ Experiments in RedisGraph for use with GraphQL
 * https://www.linkedin.com/groups/8762446/ - Join Up
 
 ## LICENSE:
-BSD
+BSD. Integrated components you must check with their corresponding issuers.
 
 ## Kubernetes Deployed Using:
 Kops - https://github.com/kubernetes/kops
