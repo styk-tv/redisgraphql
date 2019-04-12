@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-from flask import Flask, request
-import redis
-from redisgraph import Node, Edge, Graph
 import json
+from flask import Flask, request
+from redis.sentinel import Sentinel
+from redisgraph import Node, Edge, Graph
 
-r = redis.Redis(host='io-madstat-prod-redis-redis-ha.redis', port=6379)
-redis_graph = Graph('bulk', r)
+sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=0.1)
+slave = sentinel.slave_for('mymaster', socket_timeout=0.3)
+redis_graph = Graph('bulk', slave)
 app = Flask(__name__)
-
 
 @app.route('/')
 def root():

@@ -1,6 +1,6 @@
 import redis
 from redisgraph import Node, Edge, Graph
-r = redis.Redis(host='localhost', port=6379)
+r = redis.Redis(host='io-madstat-prod-redis-redis-ha.redis', port=6379)
 redis_graph = Graph('bulk', r)
 query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
 #OK-query = "MATCH (jenn:Tag) RETURN jenn LIMIT 5"
