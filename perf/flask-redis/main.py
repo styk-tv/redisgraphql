@@ -5,8 +5,7 @@ from flask import Flask, request
 from redis.sentinel import Sentinel
 from redisgraph import Node, Edge, Graph
 
-#sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=0.1)
-sentinel = Sentinel([('localhost', 26379)])
+sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=5)
 slave = sentinel.slave_for('mymaster', socket_timeout=0.3)
 redis_graph = Graph('bulk', slave)
 app = Flask(__name__)
