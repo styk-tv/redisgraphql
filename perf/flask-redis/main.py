@@ -1,6 +1,8 @@
 
-from flask import Flask, render_template, request
-import meinheld
+from flask import Flask
+#, render_template, request
+#from meinheld import server
+
 from redis.sentinel import Sentinel
 from redisgraph import Node, Edge, Graph
 
@@ -9,10 +11,10 @@ slave = sentinel.slave_for('mymaster', socket_timeout=5)
 redis_graph = Graph('bulk', slave)
 
 SECRET_KEY = 'development key'
-DEBUG = False
+DEBUG = True
 
 app = Flask(__name__)
-app.config.from_object(__name__)
+#app.config.from_object(__name__)
 
 
 @app.route('/')
@@ -22,14 +24,14 @@ def root(status, response_headers):
 
 
 @app.route('/redis',  methods=['GET'])
-def redis(status, response_headers):
+def redis(environ, start_response):
     query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
     result = redis_graph.query(query)
 
-    status = b'200 OK'
+    status = '200 OK'
     res = str(result.result_set[1][0],'utf-8')
-    #response_headers = [('Content-type', 'text/plain'), ('Content-Length', str(len(res)))]
-    #start_response(status, response_headers)
+    response_headers = [('Content-type', 'text/plain'), ('Content-Length', str(len(res)))]
+    start_response(status, response_headers)
     return [bytes(res, 'utf-8')]
 
 
