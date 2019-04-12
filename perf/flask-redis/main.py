@@ -1,9 +1,8 @@
-#!/usr/bin/env python
 
-import json
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from redis.sentinel import Sentinel
 from redisgraph import Node, Edge, Graph
+import bson
 
 sentinel = Sentinel([('io-madstat-prod-redis-redis-ha.redis', 26379)], socket_timeout=5)
 slave = sentinel.slave_for('mymaster', socket_timeout=0.3)
@@ -30,7 +29,7 @@ def metrics():
 def redis():
     query = "MATCH (t:Tag {name: 'odin'}) RETURN t"
     result = redis_graph.query(query)
-    return json.dumps(result.result_set[1])
+    return jsonify(len(result.result_set[1][0]))
 
 
 if __name__ == '__main__':
