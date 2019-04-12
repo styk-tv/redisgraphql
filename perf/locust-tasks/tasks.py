@@ -24,8 +24,7 @@ class MetricsTaskSet(TaskSet):
 
     @task(2)
     def post_redis(self):
-        self.client.post(
-            "/redis", {"deviceid": self._deviceid, "timestamp": datetime.now()})
+        self.client.get("/redis")
 
 
 class MetricsLocust(HttpLocust):
